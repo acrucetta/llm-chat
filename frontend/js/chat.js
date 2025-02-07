@@ -1,4 +1,3 @@
-
 import { db, ChatDB } from './db.js';
 
 export class Chat {
@@ -56,10 +55,18 @@ export class Chat {
                 // Save user message to IndexedDB
                 await ChatDB.addMessage(this.currentChatId, 'user', message);
 
-                // Send message through WebSocket
+                // Get chat history
+                const chatHistory = await ChatDB.getChatMessages(this.currentChatId);
+                const formattedHistory = chatHistory.map(msg => ({
+                    role: msg.role,
+                    content: msg.content
+                }));
+
+                // Send message and history through WebSocket
                 this.ws.send(JSON.stringify({
                     message,
-                    chatId: this.currentChatId
+                    chatId: this.currentChatId,
+                    history: formattedHistory
                 }));
 
                 input.value = '';

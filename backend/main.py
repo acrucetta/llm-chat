@@ -39,13 +39,28 @@ async def websocket_endpoint(websocket: WebSocket):
             data = await websocket.receive_text()
             parsed_data = json.loads(data)
             message = parsed_data["message"]
-            chat_id = parsed_data.get("chatId")  # Get chat ID from client
+            chat_id = parsed_data.get("chatId")
+            history = parsed_data.get("history", [])
+
+            # Format messages for Claude
+            formatted_messages = []
+            for msg in history:
+                formatted_messages.append({
+                    "role": msg["role"],
+                    "content": msg["content"]
+                })
+            
+            # Add the current message
+            formatted_messages.append({
+                "role": "user",
+                "content": message
+            })
 
             # Start streaming response
             message_stream = client.messages.create(
                 model="claude-3-haiku-20240307",
                 max_tokens=1024,
-                messages=[{"role": "user", "content": message}],
+                messages=formatted_messages,
                 stream=True,
             )
 
