@@ -104,17 +104,5 @@ button {
 }
 
 button:hover {
-  opacity: 0.9;
-}
-
-.chat-item {
-  padding: 0.75rem;
-  margin-bottom: 0.5rem;
-  border-radius: 0.5rem;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.chat-item:hover {
-  background: var(--hover-color);
-}
+    background: #0056b3;
+} 
