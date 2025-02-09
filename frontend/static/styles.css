@@ -27,6 +27,40 @@ body {
   border-radius: 8px;
 }
 
+.message pre {
+  background: #f6f8fa;
+  border-radius: 6px;
+  padding: 16px;
+  overflow-x: auto;
+  margin: 8px 0;
+}
+
+.message code {
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+  font-size: 0.9em;
+}
+
+.message p {
+  margin: 8px 0;
+}
+
+.message h1, .message h2, .message h3, .message h4 {
+  margin-top: 16px;
+  margin-bottom: 8px;
+}
+
+.message ul, .message ol {
+  margin: 8px 0;
+  padding-left: 24px;
+}
+
+.message blockquote {
+  border-left: 4px solid #ddd;
+  margin: 8px 0;
+  padding-left: 16px;
+  color: #666;
+}
+
 .user-message {
   background: #007AFF;
   color: white;
@@ -40,6 +74,7 @@ body {
 
 .input-area {
   display: flex;
+  flex-direction: column;
   gap: 10px;
 }
 
@@ -63,4 +98,13 @@ button {
 
 button:hover {
   background: #0056b3;
+}
+
+#model-select {
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+  margin-bottom: 10px;
+  background: white;
+  font-size: 14px;
 }
