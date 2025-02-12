@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,32 +11,39 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.9/purify.min.js"></script>
 </head>
+
 <body>
     <!-- TODO: Add chat history. -->
     <div class="app-container">
-        <div class="sidebar">
+        <div class="sidebar" id="sidebar">
             <div class="sidebar-header">
-                <button id="new-chat-button" class="new-chat-button">New Chat</button>
+                <button id="collapse-sidebar" onclick="toggleSidebar()" class="collapse-sidebar">☰</button>
+                <button id="new-chat-button"  class="new-chat-button">New Chat</button>
             </div>
             <div id="conversation-list" class="conversation-list">
                 <!-- Conversations will be populated here -->
             </div>
         </div>
-        <div class="chat-container">
+        <div class="chat-container" id="chat-container">
             <div id="chat-messages" class="messages"></div>
             <div class="input-area">
                 <select id="model-select">
                     <option value="claude-3-5-haiku-latest">Claude 3 Haiku (Fast)</option>
                     <option value="claude-3-5-sonnet-latest">Claude 3 Sonnet (Powerful)</option>
                     <option value="gpt-4o">GPT-4o (Powerful)</option>
-                    <option value="o1">o1 model (Reasoning)</option> 
-                    <option value="o1-mini">o1-mini (Reasoning)</option> 
+                    <option value="o1">o1 model (Reasoning)</option>
+                    <option value="o1-mini">o1-mini (Reasoning)</option>
+                    <option value="o3-mini">o3-mini (Reasoning)</option>
                 </select>
                 <textarea id="user-input" placeholder="Type your message..."></textarea>
-                <button id="send-button">Send</button>
+                <div class="button-group">
+                    <button id="send-button" type="button">Send</button>
+                    <button id="stop-button" type="button">Stop Generating</button>
+                </div>
             </div>
         </div>
     </div>
     <script src="/static/script.js"></script>
 </body>
-</html> 
+
+</html>

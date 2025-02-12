@@ -26,6 +26,7 @@ active_connections = []
 chat_histories = defaultdict(list)  # Store message histories by websocket
 
 DATABASE_URL = "sqlite:///./chat.db"
+MAX_TOKENS = 2048
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base.metadata.create_all(bind=engine)
@@ -59,15 +60,26 @@ async def websocket_endpoint(websocket: WebSocket):
             db.add(user_message)
             db.commit()
 
-            # Add user message to history
-            chat_histories[websocket].append({"role": "user", "content": message})
+            # Get conversation history from database
+            history = (
+                db.query(Message)
+                .filter(Message.conversation_id == conversation_id)
+                .order_by(Message.created_at)
+                .all()
+            )
 
-            # Get last N messages for context
-            context_window = chat_histories[websocket][-10:]
+            # Format messages for Claude API
+            context_window = [
+                {"role": msg.role, "content": msg.content}
+                for msg in history[-10:]  # Last 10 messages
+            ]
 
             if model.startswith("claude"):
                 message_stream = client.messages.create(
-                    model=model, max_tokens=1024, messages=context_window, stream=True
+                    model=model,
+                    max_tokens=MAX_TOKENS,
+                    messages=context_window,
+                    stream=True,
                 )
 
                 full_response = ""
@@ -76,6 +88,36 @@ async def websocket_endpoint(websocket: WebSocket):
                         full_response += chunk.delta.text
                         await websocket.send_text(
                             json.dumps({"type": "stream", "content": chunk.delta.text})
+                        )
+
+                # Save assistant message
+                assistant_message = Message(
+                    conversation_id=conversation_id,
+                    role="assistant",
+                    content=full_response,
+                )
+                db.add(assistant_message)
+                db.commit()
+
+            elif model.startswith("gpt") or model.startswith("o1"):
+                message_stream = openai_client.chat.completions.create(
+                    model=model,
+                    max_completion_tokens=MAX_TOKENS,
+                    messages=context_window,
+                    stream=True,
+                )
+
+                full_response = ""
+                for chunk in message_stream:
+                    if chunk.choices[0].delta.content is not None:
+                        full_response += chunk.choices[0].delta.content
+                        await websocket.send_text(
+                            json.dumps(
+                                {
+                                    "type": "stream",
+                                    "content": chunk.choices[0].delta.content,
+                                }
+                            )
                         )
 
                 # Save assistant message
@@ -106,7 +148,7 @@ async def get_conversations():
 
 
 @app.post("/api/conversations")
-async def create_conversation(title: str = Body(...)):
+async def create_conversation(title: str = Body(..., embed=True)):
     db = SessionLocal()
     conversation = Conversation(title=title)
     db.add(conversation)
